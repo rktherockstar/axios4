@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Appointment App</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div id="appointmentsContainer"></div>
+    <form id="editForm">
+        <label for="date">Date:</label>
+        <input type="text" id="date" name="date" required>
+        <label for="time">Time:</label>
+        <input type="text" id="time" name="time" required>
+        <label for="patientName">Patient Name:</label>
+        <input type="text" id="patientName" name="patientName" required>
+        <label for="doctorName">Doctor Name:</label>
+        <input type="text" id="doctorName" name="doctorName" required>
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Make a GET request to retrieve appointments from crudcrud.com
+            axios.get('https://crudcrud.com/api/YOUR_CRUDCRUD_API_KEY/appointments')
+                .then(response => {
+                    const appointments = response.data;
+                    displayAppointments(appointments);
+                })
+                .catch(error => {
+                    console.error('GET error:', error);
+                });
+        });
+
+        function displayAppointments(appointments) {
+            const container = document.getElementById('appointmentsContainer');
+
+            if (appointments.length === 0) {
+                container.innerHTML = '<p>No appointments found.</p>';
+                return;
+            }
+
+            const appointmentsList = document.createElement('ul');
+            appointments.forEach(appointment => {
+                const listItem = document.createElement('li');
+                const editIcon = document.createElement('span');
+                editIcon.innerHTML = '&#x270E;'; // Unicode for a pencil icon
+                editIcon.style.cursor = 'pointer';
+                editIcon.addEventListener('click', () => {
+                    // Handle edit operation on icon click
+                    populateEditForm(appointment);
+                });
+
+                listItem.textContent = `Date: ${appointment.date}, Time: ${appointment.time}, Patient: ${appointment.patientName}, Doctor: ${appointment.doctorName}`;
+                listItem.appendChild(editIcon);
+                appointmentsList.appendChild(listItem);
+            });
+
+            container.appendChild(appointmentsList);
+        }
+
+        function populateEditForm(appointment) {
+            // Populate the edit form with the user details for editing
+            document.getElementById('date').value = appointment.date;
+            document.getElementById('time').value = appointment.time;
+            document.getElementById('patientName').value = appointment.patientName;
+            document.getElementById('doctorName').value = appointment.doctorName;
+        }
+
+        document.getElementById('editForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+
+            // Get the appointment ID from the form data or wherever you store it
+            const appointmentId = /* Retrieve the appointment ID */;
+            
+            // Make a PUT request to edit the appointment with the given _id
+            axios.put(`https://crudcrud.com/api/YOUR_CRUDCRUD_API_KEY/appointments/${appointmentId}`, {
+                date: formData.get('date'),
+                time: formData.get('time'),
+                patientName: formData.get('patientName'),
+                doctorName: formData.get('doctorName')
+            })
+            .then(response => {
+                console.log('PUT success:', response.data);
+                // Update the user details on the website
+                // Optionally, you can make another GET request to refresh the data
+            })
+            .catch(error => {
+                console.error('PUT error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
